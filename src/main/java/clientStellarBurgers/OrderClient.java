@@ -1,6 +1,5 @@
 package clientStellarBurgers;
 
-import api.stellarburgers.Ingredient;
 import api.stellarburgers.Ingredients;
 import io.qameta.allure.Step;
 
@@ -24,7 +23,7 @@ public class OrderClient {
     }
 
     @Step("Создание заказа с авторизацией.")
-    public Response createOrderWithAuthorization(Order order, String token) {
+    public static Response createOrderWithAuthorization(Order order, String token) {
         return given().log().all().filter(new AllureRestAssured())
                 .header("Content-Type", "application/json")
                 .header("authorization", token)

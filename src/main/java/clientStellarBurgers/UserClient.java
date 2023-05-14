@@ -4,10 +4,7 @@ package clientStellarBurgers;
 import api.stellarburgers.User;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
-
 import static io.restassured.RestAssured.given;
-
-import io.restassured.response.Validatable;
 import org.hamcrest.Matchers;
 
 import java.util.Locale;
@@ -24,12 +21,6 @@ public class UserClient {
                 .post("/api/auth/register");
     }
 
-    @Step("Неуспешный ответ сервера при регистрации существующего пользователя")
-    public void checkExistingAuthRegister(Response response) {
-        response.then().log().all()
-                .assertThat().statusCode(403).and().body("success", Matchers.is(false))
-                .and().body("message", Matchers.is("User already exists"));
-    }
 
 
     @Step("Неуспешный ответ сервера на регистрацию пользователя.")
@@ -96,5 +87,13 @@ public class UserClient {
         response.then().log().all()
                 .assertThat().statusCode(401).and().body("success", Matchers.is(false))
                 .and().body("message", Matchers.is("You should be authorised"));
+    }
+
+    @Step("Удаление пользователя")
+    public Response deleteUser(String accessToken){
+        return given()
+                .header("Authorization",accessToken)
+                .when()
+                .delete("/api/auth/user");
     }
 }

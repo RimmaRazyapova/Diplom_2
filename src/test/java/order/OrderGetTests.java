@@ -1,7 +1,6 @@
 package order;
 
 import api.stellarburgers.User;
-import clientStellarBurgers.OrderClient;
 import clientStellarBurgers.UserClient;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
@@ -11,24 +10,27 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 
 public class OrderGetTests {
-    private OrderClient orderClient;
-    private String token;
-    User user = new User("Izum", "izum9043@yandex.ru", "1214567");
+    private String email;
+    private String password;
+    private String name;
     private UserClient userClient;
+    private User user;
     private String accessToken;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
+        name = "Izum";
+        email = "Izum057436@yandex.ru";
+        password = "GHkdjd68362";
         userClient = new UserClient();
-        orderClient = new OrderClient();
-        Response response = UserClient.postCreateNewUser(user);
-        accessToken = userClient.checkRequestAuthLogin(user).then().extract().path("accessToken");
+        user = new User(name, email, password);
+        UserClient.postCreateNewUser(user);
+        accessToken = UserClient.checkRequestAuthLogin(user).then().extract().path("accessToken");
+
     }
 
     @Test
@@ -62,10 +64,9 @@ public class OrderGetTests {
 
     @After
     public void tearDown() {
-        // Удаление созданного пользователя с помощью API
-        given()
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .delete(baseURI + "/api/auth/user");
+        // Удаление созданного пользователя
+        if (accessToken != null) {
+            userClient.deleteUser(accessToken);
+        }
     }
 }

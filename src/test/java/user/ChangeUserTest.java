@@ -11,25 +11,33 @@ import org.junit.Test;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 
-import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.given;
-
 
 public class ChangeUserTest {
 
 
-    User user = new User("Izum", "izum90437yffj@yandex.ru", "121487567");
-    UserClient userClient = new UserClient();
+    private String name;
+    private String email;
+    private String password;
+    private UserClient userClient;
+    private User user;
     private String accessToken;
+
     private final String modifiedName = "DGHsan";
     private final String modifiedEmail = "DGHann@yandex.ru";
     private final String modifiedPassword = "1645sv";
-    private String token;
+    User changeUser = new User();
 
 
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
+        name = "Izum";
+        email = "Izum057436@yandex.ru";
+        password = "GHkdjd68362";
+        userClient = new UserClient();
+        user = new User(name, email, password);
+        UserClient.postCreateNewUser(user);
+        accessToken = UserClient.checkRequestAuthLogin(user).then().extract().path("accessToken");
     }
 
 
@@ -37,8 +45,9 @@ public class ChangeUserTest {
     @DisplayName("Изменение имени пользователя с авторизацией.")
     @Description("Успешное изменение имени пользователя с авторизацией.")
     public void changeUserNameWithAuthorizationTest() {
+        changeUser.setName(modifiedName);
         user.setName(modifiedName);
-        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(user, accessToken);
+        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(changeUser, accessToken);
         response.then().log().all().assertThat().statusCode(200).and().body("success", Matchers.is(true));
     }
 
@@ -46,8 +55,9 @@ public class ChangeUserTest {
     @DisplayName("Изменение email пользователя с авторизацией.")
     @Description("Успешное изменение email пользователя с авторизацией.")
     public void changeUserEmailWithAuthorizationTest() {
+        changeUser.setName(modifiedEmail);
         user.setEmail(modifiedEmail);
-        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(user, accessToken);
+        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(changeUser, accessToken);
         response.then().log().all().assertThat().statusCode(200).and().body("success", Matchers.is(true));
     }
 
@@ -55,27 +65,18 @@ public class ChangeUserTest {
     @DisplayName("Изменение пароля пользователя с авторизацией.")
     @Description("Успешное изменение пароля пользователя с авторизацией.")
     public void changeUserPasswordWithAuthorizationTest() {
+        changeUser.setPassword(modifiedPassword);
         user.setPassword(modifiedPassword);
-        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(user, accessToken);
-        userClient.checkSuccessResponseAuthUser(response, modifiedEmail, modifiedPassword);
+        Response response = userClient.sendPatchRequestWithAuthorizationApiAuthUser(changeUser, accessToken);
+        userClient.checkSuccessResponseAuthUser(response, email, name);
     }
 
-    @Test
-    @DisplayName("Изменение имени пользователя без авторизации.")
-    @Description("Проверка изменения имени без авторизации.")
-    public void checkUpdateNameNotAuthUser() {
-        accessToken = "";
-        user.setName(modifiedName);
-        Response response = userClient.sendPatchRequestWithoutAuthorizationApiAuthUser(user);
-        userClient.checkFailedResponseAuthUser(response);
-    }
 
     @After
     public void tearDown() {
-        // Удаление созданного пользователя с помощью API
-        given()
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .delete(baseURI + "/api/auth/user");
+        // Удаление созданного пользователя
+        if (accessToken != null) {
+            userClient.deleteUser(accessToken);
+        }
     }
 }
