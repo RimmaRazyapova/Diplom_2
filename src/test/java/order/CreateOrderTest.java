@@ -120,7 +120,7 @@ public class CreateOrderTest {
 
     @Test
     @DisplayName("Создание заказа с авторизацией с неверным хешем ингредиентов.")
-    @Description("Проверка создания заказа с авторизацией с неверным хешем ингредиентов.")
+    @Description("Проверка созданияgi заказа с авторизацией с неверным хешем ингредиентов.")
     public void createOrderWithAuthorizationWithWrongHashTest() {
         Ingredients ingredients = orderClient.getIngredient();
         ingredient.add(ingredients.getData().get(1).get_id() + "khilunjlknjkbyg9876");
